@@ -13,7 +13,7 @@ export type spa_pod = struct {
 export type spa_pod_builder_state = struct {
 	offset_: u32,
 	flags: u32,
-	frame: *spa_pod_frame,
+	frame: nullable *spa_pod_frame,
 };
 
 export type spa_pod_builder = struct {
@@ -26,7 +26,7 @@ export type spa_pod_builder = struct {
 
 export type spa_pod_frame = struct {
 	pod: spa_pod,
-	parent: *spa_pod_frame,
+	parent: nullable *spa_pod_frame,
 	offset_: u32,
 	flags: u32,
 };
@@ -46,7 +46,80 @@ fn spa_pod_builder_add(
 	args: (u32 | *char | spa_format | spa_media_type | spa_media_subtype |
 		int | [SPA_AUDIO_MAX_CHANNELS]u32)...,
 ) int = {
-	return 0;
+	let res: int = 0;
+	const frame: nullable *spa_pod_frame = builder.state.frame;
+	const ftype: u32 = if (frame == null) {
+		yield spa_type::SPA_TYPE_None: u32;
+	} else {
+		const frame = frame: *spa_pod_frame;
+		return frame.pod.type_: int;
+	};
+
+	let idx_args = 0z;
+	for (true) :outer {
+		let format: nullable *char = null;
+		let n_values: int = 1;
+		let f: spa_pod_frame = spa_pod_frame { ... };
+		let choice: bool = false;
+
+		switch (ftype) {
+		case spa_type::SPA_TYPE_Object =>
+			const key = args[idx_args]: u32;
+			idx_args += 1;
+			if (key == 0) {
+				break :outer;
+			};
+			// spa_pod_builder_prop(builder, key, 0);
+		case spa_type::SPA_TYPE_Sequence =>
+			const offset_ = args[idx_args]: u32;
+			idx_args += 1;
+			const type_ = args[idx_args]: u32;
+			idx_args += 1;
+			if (type_ == 0) {
+				break :outer;
+			};
+			// spa_pod_builder_control(builder, offset_, type_);
+		case =>
+			break;
+		};
+		format = args[idx_args]: *char;
+		idx_args += 1;
+		if (format == null) {
+			break;
+		};
+
+		choice = switch (format) {
+		case null =>
+			yield false;
+		case =>
+			yield (*(format: *char)): u8 == '?': u8;
+		};
+		if (choice) {
+			format = ((format: uintptr) + 1): *char;
+			const format = format as *char;
+			// const type_: u32 = spa_choice_from_id(*format);
+			const type_: u32 = 0;
+			if ((*format): u8 != 0) {
+				format = ((format: uintptr) + 1): *char;
+			};
+
+			// spa_pod_builder_push_choice(builder, &f, type_, 0);
+
+			let n_values: u32 = args[idx_args]: u32;
+			idx_args += 1;
+		};
+		for (n_values > 0) {
+			// SPA_POD_BUILDER_COLLECT(builder, *format, args);
+			n_values -= 1;
+		};
+
+		if (choice) {
+			// spa_pod_builder_pop(builder, &f);
+			void;
+		};
+	};
+
+	return res;
 };
 
 fn spa_pod_size(pod: *spa_pod) u32 = {
