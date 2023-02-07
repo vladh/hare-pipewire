@@ -18,6 +18,7 @@ def PITCH: f32 = 440.0;
 def UNKNOWN_CONSTANT: f32 = 16767.0;
 
 fn process(data: nullable *void) void = {
+	fmt::println("process")!;
 	const state = data: *state;
 
 	const stream = state.stream as *pw::pw_stream;
@@ -47,7 +48,7 @@ fn process(data: nullable *void) void = {
 			UNKNOWN_CONSTANT;
 		for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
 			*dst = val: i16;
-			dst = (dst: uintptr + 1): *i16;
+			dst = (dst: uintptr + size(i16): uintptr): *i16;
 		};
 	};
 
@@ -87,16 +88,14 @@ export fn main() void = {
 		&STREAM_EVENTS,
 		&state);
 
-	let params: []*pw::spa_pod = [
-		pw::spa_format_audio_raw_build(&b,
-			pw::spa_param_type::SPA_PARAM_EnumFormat,
-			&pw::spa_audio_info_raw {
-				format = pw::spa_audio_format::SPA_AUDIO_FORMAT_S16,
-				channels = DEFAULT_CHANNELS,
-				rate = DEFAULT_RATE,
-				...
-			}) as *pw::spa_pod,
-	];
+	const pod = pw::spa_format_audio_raw_build(&b,
+		pw::spa_param_type::SPA_PARAM_EnumFormat,
+		&pw::spa_audio_info_raw {
+			format = pw::spa_audio_format::SPA_AUDIO_FORMAT_S16,
+			channels = DEFAULT_CHANNELS,
+			rate = DEFAULT_RATE,
+			...
+		}) as *pw::spa_pod;
 
 	const stream = state.stream as *pw::pw_stream;
 	const loop = state.loop as *pw::pw_main_loop;
@@ -107,7 +106,7 @@ export fn main() void = {
 		pw::pw_stream_flags::PW_STREAM_FLAG_AUTOCONNECT |
 		pw::pw_stream_flags::PW_STREAM_FLAG_MAP_BUFFERS |
 		pw::pw_stream_flags::PW_STREAM_FLAG_RT_PROCESS,
-		&params[0],
+		&pod,
 		1);
 
 	pw::pw_main_loop_run(loop);

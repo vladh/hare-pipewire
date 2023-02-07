@@ -117,12 +117,13 @@ fn spa_pod_builder_add(
 			yield (*(format: *char)): u8 == '?': u8;
 		};
 		if (choice) {
-			format = ((format: uintptr) + 1): *char;
+			format = ((format: uintptr) + size(char): uintptr): *char;
 			const format = format as *char;
 			const type_: u32 = spa_choice_from_id(*format);
 			const type_: u32 = 0;
 			if ((*format): u8 != 0) {
-				format = ((format: uintptr) + 1): *char;
+				format = ((format: uintptr) +
+					size(char): uintptr): *char;
 			};
 
 			spa_pod_builder_push_choice(builder, &f, type_, 0);
@@ -310,7 +311,8 @@ fn spa_pod_builder_frame(
 	frame: *spa_pod_frame,
 ) nullable *spa_pod = {
 	if (frame.offset_ + spa_pod_size(&frame.pod) <= builder.sz) {
-		return (builder.data: uintptr + frame.offset_: uintptr): *spa_pod;
+		return (builder.data: uintptr +
+			(frame.offset_ * size(u32)): uintptr): *spa_pod;
 	};
 	return null;
 };
@@ -426,7 +428,9 @@ export fn spa_pod_builder_raw(
 	};
 
 	if (res == 0 && data != null) {
-		rt::memcpy((builder.data: uintptr + offset_: uintptr): *void,
+		rt::memcpy(
+			(builder.data: uintptr +
+				((offset_ * size(u32)): uintptr)): *void,
 			data, sz);
 	};
 
