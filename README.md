@@ -1,5 +1,9 @@
 # Hare pipewire Bindings
 
+Dependencies:
+
+* [hare-spapod](https://git.sr.ht/~vladh/hare-spapod)
+
 ## Vendoring
 
 ```

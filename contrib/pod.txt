@@ -1,6 +1,6 @@
-152 15 262147 3 1 0 4 3 1 0 2 0 4 3 1 0 65537 0 4 3 259 0 65539 0 4 4 44100 0 65540 0 4 4 2 0 65541 0 16 13 4 4 69 420 
+These are some examples of POD objects and their layout in memory.
 
-
+---
                 size                   SPA_TYPE_Object   SPA_TYPE_OBJECT_Format   SPA_PARAM_EnumFormat
 0x7fffffffdca0: 160                    15                262147                   3
 
