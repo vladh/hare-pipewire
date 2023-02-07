@@ -27,32 +27,33 @@ fn process(data: nullable *void) void = {
 	};
 	const b = b: *pw::pw_buffer;
 
-	let buf = b.buffer;
-	let dst: *i16 = buf.datas[0].data;
+	const buf = b.buffer;
+	const data = buf.datas as *pw::spa_data;
+	let dst: *i16 = data.data: *i16;
 	if (dst == null) {
 		return;
 	};
 
-	const stride: int = size(i16) * DEFAULT_CHANNELS;
-	const n_frames: int = buf.datas[0].maxsize / stride;
+	const stride: u32 = (size(i16): u32) * DEFAULT_CHANNELS;
+	const n_frames: u32 = data.maxsize / stride;
 
 	for (let i = 0z; i < n_frames; i += 1) {
-		data.accumulator += TWO_PI * PITCH / DEFAULT_RATE;
-		if (data.accumulator >= TWO_PI) {
-			data.accumulator -= TWO_PI;
+		state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f32;
+		if (state.accumulator >= TWO_PI) {
+			state.accumulator -= TWO_PI;
 		};
 
-		const val = math::sinf64(data.accumulator) * DEFAULT_VOLUME *
+		const val = math::sinf64(state.accumulator) * DEFAULT_VOLUME *
 			UNKNOWN_CONSTANT;
 		for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
-			*dst = val;
+			*dst = val: i16;
 			dst = (dst: uintptr + 1): *i16;
 		};
 	};
 
-	buf.datas[0].chunk.offset_ = 0;
-	buf.datas[0].chunk.stride = stride;
-	buf.datas[0].chunk.sz = n_frames * stride;
+	data.chunk.offset_ = 0;
+	data.chunk.stride = stride: i32;
+	data.chunk.sz = n_frames * stride;
 
 	pw::pw_stream_queue_buffer(stream, b);
 };
