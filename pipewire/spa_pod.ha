@@ -69,7 +69,7 @@ fn spa_pod_builder_add(
 			if (key == 0) {
 				break :outer;
 			};
-			// spa_pod_builder_prop(builder, key, 0);
+			spa_pod_builder_prop(builder, key, 0);
 		case spa_type::SPA_TYPE_Sequence =>
 			const offset_ = args[idx_args]: u32;
 			idx_args += 1;
@@ -120,6 +120,23 @@ fn spa_pod_builder_add(
 	};
 
 	return res;
+};
+
+type spa_pod_builder_temp = struct {
+	key: u32,
+	flags: u32,
+};
+
+fn spa_pod_builder_prop(
+	builder: *spa_pod_builder,
+	key: u32,
+	flags: u32,
+) int = {
+	const p: spa_pod_builder_temp = spa_pod_builder_temp {
+		key = key,
+		flags = flags,
+	};
+	return spa_pod_builder_raw(builder, &p, size(spa_pod_builder_temp): u32);
 };
 
 fn spa_pod_size(pod: *spa_pod) u32 = {
