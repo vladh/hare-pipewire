@@ -1,9 +1,29 @@
+use fmt;
 use rt;
 
 export type spa_command = void; // opaque
 
 export def SPA_POD_BUILDER_FLAG_BODY: u32 = 1 << 0;
 export def SPA_POD_BUILDER_FLAG_FIRST: u32 = 1 << 1;
+
+type spa_choice = enum u32 {
+	SPA_CHOICE_None,
+	SPA_CHOICE_Range,
+	SPA_CHOICE_Step,
+	SPA_CHOICE_Enum,
+	SPA_CHOICE_Flags,
+};
+
+type spa_pod_choice_body = struct {
+	type_: u32,
+	flags: u32,
+	child: spa_pod,
+};
+
+type spa_pod_choice = struct {
+	pod: spa_pod,
+	body: spa_pod_choice_body,
+};
 
 export type spa_pod = struct {
 	sz: u32,
@@ -41,10 +61,12 @@ export type spa_pod_object = struct {
 	body: spa_pod_object_body,
 };
 
+export type spa_pod_arg = (u32 | *char | spa_format | spa_media_type |
+	spa_media_subtype | int | [SPA_AUDIO_MAX_CHANNELS]u32);
+
 fn spa_pod_builder_add(
 	builder: *spa_pod_builder,
-	args: (u32 | *char | spa_format | spa_media_type | spa_media_subtype |
-		int | [SPA_AUDIO_MAX_CHANNELS]u32)...,
+	args: spa_pod_arg...,
 ) int = {
 	let res: int = 0;
 	const frame: nullable *spa_pod_frame = builder.state.frame;
@@ -97,19 +119,20 @@ fn spa_pod_builder_add(
 		if (choice) {
 			format = ((format: uintptr) + 1): *char;
 			const format = format as *char;
-			// const type_: u32 = spa_choice_from_id(*format);
+			const type_: u32 = spa_choice_from_id(*format);
 			const type_: u32 = 0;
 			if ((*format): u8 != 0) {
 				format = ((format: uintptr) + 1): *char;
 			};
 
-			// spa_pod_builder_push_choice(builder, &f, type_, 0);
+			spa_pod_builder_push_choice(builder, &f, type_, 0);
 
 			let n_values: u32 = args[idx_args]: u32;
 			idx_args += 1;
 		};
 		for (n_values > 0) {
-			// SPA_POD_BUILDER_COLLECT(builder, *format, args);
+			const format = format as *char;
+			spa_pod_builder_collect(builder, *format, args);
 			n_values -= 1;
 		};
 
@@ -120,6 +143,128 @@ fn spa_pod_builder_add(
 	};
 
 	return res;
+};
+
+export fn spa_pod_builder_collect(
+	builder: *spa_pod_builder,
+	type_: char,
+	args: []spa_pod_arg,
+) void = {
+	// TODO
+	switch (type_: u8) {
+	case 'b': u8 =>
+		// spa_pod_builder_bool(builder, !!va_arg(args, int));
+		void;
+	case 'I': u8 =>
+		// spa_pod_builder_id(builder, va_arg(args, uint32_t));
+		void;
+	case 'i': u8 =>
+		// spa_pod_builder_int(builder, va_arg(args, int));
+		void;
+	case 'l': u8 =>
+		// spa_pod_builder_long(builder, va_arg(args, int64_t));
+		void;
+	case 'f': u8 =>
+		// spa_pod_builder_float(builder, va_arg(args, double));
+		void;
+	case 'd': u8 =>
+		// spa_pod_builder_double(builder, va_arg(args, double));
+		void;
+	case 's': u8 =>
+		// char *strval = va_arg(args, char *);
+		// if (strval != NULL) {
+		// 	size_t len = strlen(strval);
+		// 	spa_pod_builder_string_len(builder, strval, len);
+		// }
+		// else
+		// 	spa_pod_builder_none(builder);
+		void;
+	case 'S': u8 =>
+		// char *strval = va_arg(args, char *);
+		// size_t len = va_arg(args, int);
+		// spa_pod_builder_string_len(builder, strval, len);
+		void;
+	case 'y': u8 =>
+		// void *ptr  = va_arg(args, void *);
+		// int len = va_arg(args, int);
+		// spa_pod_builder_bytes(builder, ptr, len);
+		void;
+	case 'R': u8 =>
+		// struct spa_rectangle *rectval =
+		// 	va_arg(args, struct spa_rectangle *);
+		// spa_pod_builder_rectangle(builder,
+		// 		rectval->width, rectval->height);
+		void;
+	case 'F': u8 =>
+		// struct spa_fraction *fracval =
+		// 	va_arg(args, struct spa_fraction *);
+		// spa_pod_builder_fraction(builder, fracval->num, fracval->denom);\
+		void;
+	case 'a': u8 =>
+		// int child_size = va_arg(args, int);
+		// int child_type = va_arg(args, int);
+		// int n_elems = va_arg(args, int);
+		// void *elems = va_arg(args, void *);
+		// spa_pod_builder_array(builder, child_size,
+		// 		child_type, n_elems, elems);
+		void;
+	case 'p': u8 =>
+		// int t = va_arg(args, uint32_t);
+		// spa_pod_builder_pointer(builder, t, va_arg(args, void *));
+		void;
+	case 'h': u8 =>
+		// spa_pod_builder_fd(builder, va_arg(args, int));
+		void;
+	case 'P': u8, 'O': u8, 'T': u8, 'V': u8 =>
+		// struct spa_pod *pod = va_arg(args, struct spa_pod *);
+		// if (pod == NULL)
+		// 	spa_pod_builder_none(builder);
+		// else
+		// 	spa_pod_builder_primitive(builder, pod);
+		void;
+	};
+	abort("not implemented");
+};
+
+export fn spa_pod_builder_push_choice(
+	builder: *spa_pod_builder,
+	frame: *spa_pod_frame,
+	type_: u32,
+	flags: u32,
+) int = {
+	const p: spa_pod_choice = spa_pod_choice {
+		pod = spa_pod {
+			sz = (size(spa_pod_choice_body) - size(spa_pod)): u32,
+			type_ = spa_type::SPA_TYPE_Choice,
+		},
+		body = spa_pod_choice_body {
+			type_ = type_,
+			flags = flags,
+			child = spa_pod { ... },
+		},
+	};
+	const offset_: u32 = builder.state.offset_;
+	const res = spa_pod_builder_raw(builder, &p,
+		(size(spa_pod_choice) - size(spa_pod)): u32);
+	spa_pod_builder_push(builder, frame, &p.pod, offset_);
+	return res;
+};
+
+export fn spa_choice_from_id(id: char) u32 = {
+	switch (id: u8) {
+	case 'r': u8 =>
+		return spa_choice::SPA_CHOICE_Range;
+	case 's': u8 =>
+		return spa_choice::SPA_CHOICE_Step;
+	case 'e': u8 =>
+		return spa_choice::SPA_CHOICE_Enum;
+	case 'f': u8 =>
+		return spa_choice::SPA_CHOICE_Flags;
+	case 'n': u8 =>
+		return spa_choice::SPA_CHOICE_None;
+	case =>
+		return spa_choice::SPA_CHOICE_None;
+	};
 };
 
 type spa_pod_builder_prop_temp = struct {
@@ -274,8 +419,8 @@ export fn spa_pod_builder_raw(
 	if (offset_ + sz > builder.sz) {
 		res = -rt::ENOSPC;
 		if (offset_ <= builder.sz) {
-			// There is some annoying macro stuff that needs to
-			// happen here, see spa/pod/builder.h.
+			// TODO: There is some annoying macro stuff that needs
+			// to happen here, see spa/pod/builder.h.
 			abort("not implemented");
 		};
 	};

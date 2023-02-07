@@ -1,4 +1,4 @@
-type spa_format = enum {
+export type spa_format = enum {
 	SPA_FORMAT_START,
 	SPA_FORMAT_mediaType,
 	SPA_FORMAT_mediaSubtype,
@@ -41,7 +41,7 @@ type spa_format = enum {
 	SPA_FORMAT_START_Stream = 0x50000,
 	SPA_FORMAT_START_Application = 0x60000,
 };
-type spa_media_type = enum {
+export type spa_media_type = enum {
 	SPA_MEDIA_TYPE_unknown,
 	SPA_MEDIA_TYPE_audio,
 	SPA_MEDIA_TYPE_video,
@@ -50,7 +50,7 @@ type spa_media_type = enum {
 	SPA_MEDIA_TYPE_stream,
 	SPA_MEDIA_TYPE_application,
 };
-type spa_media_subtype = enum {
+export type spa_media_subtype = enum {
 	SPA_MEDIA_SUBTYPE_unknown,
 	SPA_MEDIA_SUBTYPE_raw,
 	SPA_MEDIA_SUBTYPE_dsp,
