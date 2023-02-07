@@ -11,23 +11,24 @@ export type builder = struct {
 };
 
 export fn add(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 	value: u32,
 ) void = {
+	assert(builder.idx + 1 < len(buffer));
 	buffer[builder.idx] = value;
 	builder.idx += 1;
 };
 
 export fn add_padding(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 ) void = {
 	add(buffer, builder, 0);
 };
 
 export fn record_bytelen(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 	value: u32,
 ) void = {
@@ -36,7 +37,7 @@ export fn record_bytelen(
 };
 
 export fn push_struct(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 ) void = {
 	append(builder.stack, builder_container {
@@ -48,14 +49,14 @@ export fn push_struct(
 };
 
 export fn pop(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 ) void = {
 	void;
 };
 
 export fn add_int(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 	value: i32,
 ) void = {
@@ -69,7 +70,7 @@ export fn add_int(
 };
 
 export fn print_buffer(
-	buffer: *[_]u32,
+	buffer: *[]u32,
 	builder: *builder,
 ) void = {
 	for (let i = 0z; i < builder.idx; i += 1) {
