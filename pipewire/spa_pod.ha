@@ -223,7 +223,7 @@ export fn spa_pod_builder_collect(
 		// 	spa_pod_builder_primitive(builder, pod);
 		void;
 	};
-	abort("not implemented");
+	abort("spa_pod_builder_collect() not implemented");
 };
 
 export fn spa_pod_builder_push_choice(
@@ -421,7 +421,7 @@ export fn spa_pod_builder_raw(
 		if (offset_ <= builder.sz) {
 			// TODO: There is some annoying macro stuff that needs
 			// to happen here, see spa/pod/builder.h.
-			abort("not implemented");
+			abort("spa_pod_builder_raw branch not implemented");
 		};
 	};
 

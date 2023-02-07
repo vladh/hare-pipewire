@@ -9,6 +9,19 @@ export type pw_stream_state = enum {
 	PW_STREAM_STATE_PAUSED = 2,
 	PW_STREAM_STATE_STREAMING = 3,
 };
+export type pw_stream_flags = enum u32 {
+	PW_STREAM_FLAG_NONE = 0,
+	PW_STREAM_FLAG_AUTOCONNECT = (1 << 0),
+	PW_STREAM_FLAG_INACTIVE = (1 << 1),
+	PW_STREAM_FLAG_MAP_BUFFERS = (1 << 2),
+	PW_STREAM_FLAG_DRIVER = (1 << 3),
+	PW_STREAM_FLAG_RT_PROCESS = (1 << 4),
+	PW_STREAM_FLAG_NO_CONVERT = (1 << 5),
+	PW_STREAM_FLAG_EXCLUSIVE = (1 << 6),
+	PW_STREAM_FLAG_DONT_RECONNECT = (1 << 7),
+	PW_STREAM_FLAG_ALLOC_BUFFERS = (1 << 8),
+	PW_STREAM_FLAG_TRIGGER = (1 << 9),
+};
 
 export type pw_stream_events = struct {
 	version: u32,
@@ -45,3 +58,16 @@ export @symbol("pw_stream_new_simple") fn pw_stream_new_simple(
 	events: nullable *pw_stream_events,
 	data: nullable *void,
 ) *pw_stream;
+
+export @symbol("pw_stream_connect") fn pw_stream_connect(
+	stream: *pw_stream,
+	direction: pw_direction,
+	target_id: u32,
+	flags: pw_stream_flags,
+	params: **spa_pod,
+	n_params: u32,
+) int;
+
+export @symbol("pw_stream_destroy") fn pw_stream_destroy(
+	stream: *pw_stream,
+) void;

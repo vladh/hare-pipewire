@@ -26,7 +26,6 @@ def STREAM_EVENTS: pw::pw_stream_events = pw::pw_stream_events {
 
 export fn main() void = {
 	let state = state { ... };
-	let params: []nullable *pw::spa_pod = [null: *pw::spa_pod];
 	let buffer: [1024]u8 = [0...];
 	let b: pw::spa_pod_builder = pw::spa_pod_builder {
 		data = &buffer[0]: nullable *void,
@@ -48,14 +47,31 @@ export fn main() void = {
 		&STREAM_EVENTS,
 		&state);
 
-	params[0] = pw::spa_format_audio_raw_build(&b,
-		pw::spa_param_type::SPA_PARAM_EnumFormat,
-		&pw::spa_audio_info_raw {
-			format = pw::spa_audio_format::SPA_AUDIO_FORMAT_S16,
-			channels = DEFAULT_CHANNELS,
-			rate = DEFAULT_RATE,
-			...
-		});
+	let params: []*pw::spa_pod = [
+		pw::spa_format_audio_raw_build(&b,
+			pw::spa_param_type::SPA_PARAM_EnumFormat,
+			&pw::spa_audio_info_raw {
+				format = pw::spa_audio_format::SPA_AUDIO_FORMAT_S16,
+				channels = DEFAULT_CHANNELS,
+				rate = DEFAULT_RATE,
+				...
+			}) as *pw::spa_pod,
+	];
 
-	fmt::printfln("hello")!;
+	const stream = state.stream as *pw::pw_stream;
+	const loop = state.loop as *pw::pw_main_loop;
+
+	pw::pw_stream_connect(stream,
+		pw::pw_direction::PW_DIRECTION_OUTPUT,
+		pw::PW_ID_ANY,
+		pw::pw_stream_flags::PW_STREAM_FLAG_AUTOCONNECT |
+		pw::pw_stream_flags::PW_STREAM_FLAG_MAP_BUFFERS |
+		pw::pw_stream_flags::PW_STREAM_FLAG_RT_PROCESS,
+		&params[0],
+		1);
+
+	pw::pw_main_loop_run(loop);
+
+	pw::pw_stream_destroy(stream);
+	pw::pw_main_loop_destroy(loop);
 };
