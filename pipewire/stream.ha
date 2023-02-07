@@ -1,7 +1,13 @@
+use spa;
+
 export type pw_stream = void; // opaque
 export type pw_stream_control = void; // opaque
+export type pw_direction = enum {
+	PW_DIRECTION_INPUT = 0,
+	PW_DIRECTION_OUTPUT = 1,
+};
 export type pw_buffer = struct {
-	buffer: *spa_buffer,
+	buffer: *spa::spa_buffer,
 	user_data: *void,
 	sz: u64,
 	requested: u64,
@@ -44,7 +50,7 @@ export type pw_stream_events = struct {
 		sz: u32) void,
 	param_changed: *fn(data: nullable *void,
 		id: u32,
-		param: nullable *spa_pod) void,
+		param: nullable *spa::spa_pod) void,
 	add_buffer: *fn(data: nullable *void,
 		buffer: nullable *pw_buffer) void,
 	remove_buffer: *fn(data: nullable *void,
@@ -52,7 +58,7 @@ export type pw_stream_events = struct {
 	process: *fn(data: nullable *void) void,
 	drained: *fn(data: nullable *void) void,
 	command: *fn(data: nullable *void,
-		command: nullable *spa_command) void,
+		command: nullable *spa::spa_command) void,
 	trigger_done: *fn(data: nullable *void) void,
 };
 
@@ -69,7 +75,7 @@ export @symbol("pw_stream_connect") fn pw_stream_connect(
 	direction: pw_direction,
 	target_id: u32,
 	flags: pw_stream_flags,
-	params: **spa_pod,
+	params: **spa::spa_pod,
 	n_params: u32,
 ) int;
 

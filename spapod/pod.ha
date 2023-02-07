@@ -1,7 +1,7 @@
 def U32_SIZE: u32 = 4;
 
 export type builder_container = struct {
-	type_: spa_type,
+	ctype: spa_type,
 	start_idx: size,
 };
 
@@ -9,6 +9,7 @@ export type builder = struct {
 	stack: []builder_container,
 	idx: size,
 	added_bytelen: size,
+	added_container_bytelen: size,
 };
 
 export fn add_nolen(
@@ -19,6 +20,15 @@ export fn add_nolen(
 	assert(builder.idx + 1 < len(buffer));
 	buffer[builder.idx] = value;
 	builder.idx += 1;
+};
+
+export fn add_clen(
+	buffer: *[]u32,
+	builder: *builder,
+	value: u32,
+) void = {
+	add_nolen(buffer, builder, value);
+	builder.added_container_bytelen += U32_SIZE;
 };
 
 export fn add(
@@ -54,7 +64,7 @@ export fn push_struct(
 	builder: *builder,
 ) void = {
 	append(builder.stack, builder_container {
-		type_ = spa_type::Struct,
+		ctype = spa_type::Struct,
 		start_idx = builder.idx,
 	});
 	add(buffer, builder, 0); // bytelen
@@ -68,13 +78,30 @@ export fn push_object(
 	oid: u32,
 ) void = {
 	append(builder.stack, builder_container {
-		type_ = spa_type::Object,
+		ctype = spa_type::Object,
 		start_idx = builder.idx,
 	});
-	add_nolen(buffer, builder, 0); // bytelen
-	add_nolen(buffer, builder, spa_type::Object); // type
+	add_clen(buffer, builder, 0); // bytelen
+	add_clen(buffer, builder, spa_type::Object); // type
 	add(buffer, builder, otype); // otype
 	add(buffer, builder, oid); // oid
+	record_bytelen(buffer, builder);
+};
+
+export fn push_array(
+	buffer: *[]u32,
+	builder: *builder,
+	atype: u32,
+	atypelen: u32,
+) void = {
+	append(builder.stack, builder_container {
+		ctype = spa_type::Array,
+		start_idx = builder.idx,
+	});
+	add_clen(buffer, builder, 0); // bytelen
+	add_clen(buffer, builder, spa_type::Array); // type
+	add(buffer, builder, atypelen); // atypelen
+	add(buffer, builder, atype); // atype
 	record_bytelen(buffer, builder);
 };
 
@@ -85,7 +112,14 @@ export fn pop(
 	if (len(builder.stack) == 1) {
 		return;
 	};
-	abort("nested containers not yet implemented");
+	const last_container = builder.stack[len(builder.stack) - 1];
+	const parent_container = builder.stack[len(builder.stack) - 2];
+	buffer[parent_container.start_idx] +=
+		buffer[last_container.start_idx] +
+		builder.added_container_bytelen: u32;
+	delete(builder.stack[len(builder.stack) - 1]);
+	add_padding_if_needed(buffer, builder);
+	builder.added_container_bytelen = 0;
 };
 
 export fn add_prop(
@@ -104,6 +138,7 @@ export fn add_int(
 	builder: *builder,
 	value: i32,
 ) void = {
+	const last_container = builder.stack[len(builder.stack) - 1];
 	add(buffer, builder, U32_SIZE); // bytelen
 	add(buffer, builder, spa_type::Int); // type
 	add(buffer, builder, value: u32); // value
@@ -116,9 +151,20 @@ export fn add_id(
 	builder: *builder,
 	value: u32,
 ) void = {
+	const last_container = builder.stack[len(builder.stack) - 1];
 	add(buffer, builder, U32_SIZE); // bytelen
 	add(buffer, builder, spa_type::Id); // type
 	add(buffer, builder, value: u32); // value
 	add_padding_if_needed(buffer, builder);
+	record_bytelen(buffer, builder);
+};
+
+export fn add_array_val(
+	buffer: *[]u32,
+	builder: *builder,
+	value: u32,
+) void = {
+	const last_container = builder.stack[len(builder.stack) - 1];
+	add(buffer, builder, value);
 	record_bytelen(buffer, builder);
 };

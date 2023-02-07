@@ -2,6 +2,8 @@ use fmt;
 use math;
 use os;
 use pw = pipewire;
+use sp = spapod;
+use spa;
 
 type state = struct {
 	loop: nullable *pw::pw_main_loop,
@@ -18,7 +20,6 @@ def PITCH: f32 = 440.0;
 def UNKNOWN_CONSTANT: f32 = 16767.0;
 
 fn process(data: nullable *void) void = {
-	fmt::println("process")!;
 	const state = data: *state;
 
 	const stream = state.stream as *pw::pw_stream;
@@ -29,7 +30,7 @@ fn process(data: nullable *void) void = {
 	const b = b: *pw::pw_buffer;
 
 	const buf = b.buffer;
-	const data = buf.datas as *pw::spa_data;
+	const data = buf.datas as *spa::spa_data;
 	let dst: *i16 = data.data: *i16;
 	if (dst == null) {
 		return;
@@ -67,12 +68,6 @@ def STREAM_EVENTS: pw::pw_stream_events = pw::pw_stream_events {
 
 export fn main() void = {
 	let state = state { ... };
-	let buffer: [1024]u8 = [0...];
-	let b: pw::spa_pod_builder = pw::spa_pod_builder {
-		data = &buffer[0]: nullable *void,
-		sz = (size(u8) * 1024): u32,
-		...
-	};
 	const argc: int = 0;
 	const argv: nullable **char = null;
 	pw::pw_init(&argc, &argv);
@@ -88,14 +83,28 @@ export fn main() void = {
 		&STREAM_EVENTS,
 		&state);
 
-	const pod = pw::spa_format_audio_raw_build(&b,
-		pw::spa_param_type::SPA_PARAM_EnumFormat,
-		&pw::spa_audio_info_raw {
-			format = pw::spa_audio_format::SPA_AUDIO_FORMAT_S16,
-			channels = DEFAULT_CHANNELS,
-			rate = DEFAULT_RATE,
-			...
-		}) as *pw::spa_pod;
+	let buf: []u32 = alloc([0...], 1024);
+	let b: sp::builder = sp::builder { ... };
+	sp::push_object(&buf, &b,
+		sp::spa_type::OBJECT_Format,
+		sp::spa_param_type::EnumFormat: u32);
+	sp::add_prop(&buf, &b, sp::spa_format::mediaType: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_media_type::audio);
+	sp::add_prop(&buf, &b, sp::spa_format::mediaSubtype: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_media_subtype::raw);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_format: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_audio_format::S16);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_rate: u32, 0);
+	sp::add_int(&buf, &b, DEFAULT_RATE: i32);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_channels: u32, 0);
+	sp::add_int(&buf, &b, DEFAULT_CHANNELS: i32);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_position: u32, 0);
+	sp::push_array(&buf, &b, sp::spa_type::Id, size(u32): u32);
+	sp::add_array_val(&buf, &b, 69);
+	sp::add_array_val(&buf, &b, 420);
+	sp::pop(&buf, &b);
+	sp::pop(&buf, &b);
+	const pod: *spa::spa_pod = &buf[0]: *spa::spa_pod;
 
 	const stream = state.stream as *pw::pw_stream;
 	const loop = state.loop as *pw::pw_main_loop;
