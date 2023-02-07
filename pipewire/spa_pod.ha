@@ -78,7 +78,7 @@ fn spa_pod_builder_add(
 			if (type_ == 0) {
 				break :outer;
 			};
-			// spa_pod_builder_control(builder, offset_, type_);
+			spa_pod_builder_control(builder, offset_, type_);
 		case =>
 			break;
 		};
@@ -114,7 +114,7 @@ fn spa_pod_builder_add(
 		};
 
 		if (choice) {
-			// spa_pod_builder_pop(builder, &f);
+			spa_pod_builder_pop(builder, &f);
 			void;
 		};
 	};
@@ -122,7 +122,7 @@ fn spa_pod_builder_add(
 	return res;
 };
 
-type spa_pod_builder_temp = struct {
+type spa_pod_builder_prop_temp = struct {
 	key: u32,
 	flags: u32,
 };
@@ -132,11 +132,28 @@ fn spa_pod_builder_prop(
 	key: u32,
 	flags: u32,
 ) int = {
-	const p: spa_pod_builder_temp = spa_pod_builder_temp {
+	const p: spa_pod_builder_prop_temp = spa_pod_builder_prop_temp {
 		key = key,
 		flags = flags,
 	};
-	return spa_pod_builder_raw(builder, &p, size(spa_pod_builder_temp): u32);
+	return spa_pod_builder_raw(builder, &p, size(spa_pod_builder_prop_temp): u32);
+};
+
+type spa_pod_builder_control_temp = struct {
+	offset_: u32,
+	type_: u32,
+};
+
+fn spa_pod_builder_control(
+	builder: *spa_pod_builder,
+	offset_: u32,
+	type_: u32,
+) u32 = {
+	const p: spa_pod_builder_control_temp = spa_pod_builder_control_temp {
+		offset_ = offset_,
+		type_ = type_,
+	};
+	return spa_pod_builder_raw(builder, &p, size(spa_pod_builder_control_temp): u32): u32;
 };
 
 fn spa_pod_size(pod: *spa_pod) u32 = {
