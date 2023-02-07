@@ -1,13 +1,13 @@
                 size                   SPA_TYPE_Object   SPA_TYPE_OBJECT_Format   SPA_PARAM_EnumFormat
 0x7fffffffdca0: 160                    15                262147                   3
 
-                SPA_FORMAT_mediaType   ???               ???                      SPA_TYPE_Id
+                SPA_FORMAT_mediaType   flags             size                     SPA_TYPE_Id
 0x7fffffffdcb0: 1                      0                 4                        3
 
-                SPA_MEDIA_TYPE_audio   padding           SPA_FORMAT_mediaSubtype  ???
+                SPA_MEDIA_TYPE_audio   padding           SPA_FORMAT_mediaSubtype  flags
 0x7fffffffdcc0: 1                      0                 2                        0
 
-                ???                    SPA_TYPE_Id       SPA_MEDIA_SUBTYPE_raw    padding
+                size                   SPA_TYPE_Id       SPA_MEDIA_SUBTYPE_raw    padding
 0x7fffffffdcd0: 4                      3                 1                        0
 
 
@@ -27,3 +27,57 @@
 
 
 0x7fffffffdd30: 16                     13                4                        3
+
+
+
+
+length = 000000xx = 32
+type   = 0000000e = 14 = SPA_TYPE_Struct
+value  =
+	length   = 00000004 = 4
+	type     = 00000004 = SPA_TYPE_Int
+	value    = 00000005 = 5
+	_padding = 00000000 (always align to 8 bytes)
+
+	length   = 00000004 = 4
+	type     = 00000006 = SPA_TYPE_Float
+	value    = 40490e56 = 3.1415
+	_padding = 00000000 (always align to 8 bytes)
+
+
+
+
+length = 000000xx = 16
+type   = 0000000d = 13 = SPA_TYPE_Array
+value  =
+	length   = 00000004 = 4
+	type     = 00000004 = SPA_TYPE_Int // type of the first element
+	value    = 00000005 = 5
+	value    = 40490e56 = 3.1415
+
+
+
+
+length = 000000xx = 20
+type   = 0000000e = 13 = SPA_TYPE_Array
+value  =
+	length   = 00000004 = 4
+	type     = 00000004 = SPA_TYPE_Int
+	value    = 00000005 = 5
+	value    = 40490e56 = 3.1415
+	value    = 000000xx = 20
+
+
+
+
+length = 000000xx = 32
+type   = 0000000f = 15 = SPA_TYPE_Object
+otype  = xxxxxxxx = SPA_TYPE_OBJECT_Format (262147)
+oid    = xxxxxxxx = SPA_PARAM_EnumFormat (3)
+value  =
+	key      = 00010001 = SPA_FORMAT_AUDIO_format (65537)
+	flags    = 00000000 = (none)
+	length   = 00000004 = 4
+	type     = 00000003 = SPA_TYPE_Id (3)
+	value    = 00000101 = SPA_AUDIO_FORMAT_S16 (259)
+	_padding = 00000000 (always align to 8 bytes)
