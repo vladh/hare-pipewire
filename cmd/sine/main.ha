@@ -11,13 +11,13 @@ type state = struct {
 	accumulator: f64,
 };
 
-def TWO_PI: f64 = math::PI;
+def TWO_PI: f64 = math::PI + math::PI;
 def DEFAULT_RATE: u32 = 44100;
 def DEFAULT_CHANNELS: u32 = 2;
-def DEFAULT_VOLUME: f32 = 0.7;
-def PITCH: f32 = 440.0;
+def DEFAULT_VOLUME: f64 = 0.7;
+def PITCH: f64 = 440.0;
 // TODO: What is this?
-def UNKNOWN_CONSTANT: f32 = 16767.0;
+def UNKNOWN_CONSTANT: f64 = 16767.0;
 
 fn process(data: nullable *void) void = {
 	const state = data: *state;
@@ -40,7 +40,7 @@ fn process(data: nullable *void) void = {
 	const n_frames: u32 = data.maxsize / stride;
 
 	for (let i = 0z; i < n_frames; i += 1) {
-		state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f32;
+		state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f64;
 		if (state.accumulator >= TWO_PI) {
 			state.accumulator -= TWO_PI;
 		};
