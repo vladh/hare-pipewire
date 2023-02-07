@@ -85,7 +85,10 @@ export fn pop(
 	buffer: *[]u32,
 	builder: *builder,
 ) void = {
-	void;
+	if (len(builder.stack) == 1) {
+		return;
+	};
+	abort("nested containers not yet implemented");
 };
 
 export fn add_prop(
