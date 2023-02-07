@@ -1,6 +1,11 @@
 export type pw_stream = void; // opaque
 export type pw_stream_control = void; // opaque
-export type pw_buffer = void; // opaque
+export type pw_buffer = struct {
+	buffer: *spa_buffer,
+	user_data: *void,
+	sz: u64,
+	requested: u64,
+};
 export def PW_VERSION_STREAM_EVENTS: u32 = 2;
 export type pw_stream_state = enum {
 	PW_STREAM_STATE_ERROR = -1,
@@ -71,3 +76,12 @@ export @symbol("pw_stream_connect") fn pw_stream_connect(
 export @symbol("pw_stream_destroy") fn pw_stream_destroy(
 	stream: *pw_stream,
 ) void;
+
+export @symbol("pw_stream_dequeue_buffer") fn pw_stream_dequeue_buffer(
+	stream: *pw_stream,
+) nullable *pw_buffer;
+
+export @symbol("pw_stream_queue_buffer") fn pw_stream_queue_buffer(
+	stream: *pw_stream,
+	buffer: *pw_buffer,
+) int;
