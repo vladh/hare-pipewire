@@ -67,7 +67,7 @@ export type spa_param_type = enum u32 {
 	ProcessLatency,
 };
 
-export type spa_format = enum {
+export type spa_format = enum u32 {
 	START,
 	mediaType,
 	mediaSubtype,
@@ -111,7 +111,7 @@ export type spa_format = enum {
 	START_Application = 0x60000,
 };
 
-export type spa_media_type = enum {
+export type spa_media_type = enum u32 {
 	unknown,
 	audio,
 	video,
@@ -121,7 +121,7 @@ export type spa_media_type = enum {
 	application,
 };
 
-export type spa_media_subtype = enum {
+export type spa_media_subtype = enum u32 {
 	unknown,
 	raw,
 	dsp,

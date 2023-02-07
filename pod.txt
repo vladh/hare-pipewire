@@ -1,3 +1,5 @@
+128 15 262147 3 1 0 4 3 1 0 2 0 4 3 1 0 65537 0 4 3 259 0 65539 0 4 3 44100 0 65540 0 4 3 2 0 
+
                 size                   SPA_TYPE_Object   SPA_TYPE_OBJECT_Format   SPA_PARAM_EnumFormat
 0x7fffffffdca0: 160                    15                262147                   3
 

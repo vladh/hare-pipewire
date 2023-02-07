@@ -1,5 +1,3 @@
-use fmt;
-
 def U32_SIZE: u32 = 4;
 
 export type builder_container = struct {
@@ -48,7 +46,6 @@ export fn record_bytelen(
 	const value = builder.added_bytelen: u32;
 	const last_container = builder.stack[len(builder.stack) - 1];
 	buffer[last_container.start_idx] += value;
-	fmt::println(builder.added_bytelen)!;
 	builder.added_bytelen = 0;
 };
 
@@ -67,7 +64,7 @@ export fn push_struct(
 export fn push_object(
 	buffer: *[]u32,
 	builder: *builder,
-	otype: spa_type,
+	otype: u32,
 	oid: u32,
 ) void = {
 	append(builder.stack, builder_container {
@@ -76,7 +73,7 @@ export fn push_object(
 	});
 	add_nolen(buffer, builder, 0); // bytelen
 	add_nolen(buffer, builder, spa_type::Object); // type
-	add(buffer, builder, otype: u32); // otype
+	add(buffer, builder, otype); // otype
 	add(buffer, builder, oid); // oid
 	record_bytelen(buffer, builder);
 };
@@ -114,12 +111,14 @@ export fn add_int(
 	record_bytelen(buffer, builder);
 };
 
-export fn print_buffer(
+export fn add_id(
 	buffer: *[]u32,
 	builder: *builder,
+	value: u32,
 ) void = {
-	for (let i = 0z; i < builder.idx; i += 1) {
-		fmt::printf("{} ", buffer[i])!;
-	};
-	fmt::println("")!;
+	add(buffer, builder, U32_SIZE); // bytelen
+	add(buffer, builder, spa_type::Id); // type
+	add(buffer, builder, value: u32); // value
+	add_padding_if_needed(buffer, builder);
+	record_bytelen(buffer, builder);
 };

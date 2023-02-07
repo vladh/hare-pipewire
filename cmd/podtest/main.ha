@@ -1,15 +1,25 @@
 use fmt;
 use sp = spapod;
 
+def DEFAULT_RATE: u32 = 44100;
+def DEFAULT_CHANNELS: u32 = 2;
+
 export fn main() void = {
-	let buffer: []u32 = alloc([0...], 1024);
-	let builder: sp::builder = sp::builder { ... };
-	sp::push_object(&buffer, &builder,
+	let buf: []u32 = alloc([0...], 1024);
+	let b: sp::builder = sp::builder { ... };
+	sp::push_object(&buf, &b,
 		sp::spa_type::OBJECT_Format,
 		sp::spa_param_type::EnumFormat: u32);
-	sp::add_prop(&buffer, &builder,
-		sp::spa_format::AUDIO_format: u32, 0);
-	sp::add_int(&buffer, &builder, 69);
-	sp::pop(&buffer, &builder);
-	sp::print_buffer(&buffer, &builder);
+	sp::add_prop(&buf, &b, sp::spa_format::mediaType: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_media_type::audio);
+	sp::add_prop(&buf, &b, sp::spa_format::mediaSubtype: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_media_subtype::raw);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_format: u32, 0);
+	sp::add_id(&buf, &b, sp::spa_audio_format::S16);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_rate: u32, 0);
+	sp::add_int(&buf, &b, DEFAULT_RATE);
+	sp::add_prop(&buf, &b, sp::spa_format::AUDIO_channels: u32, 0);
+	sp::add_int(&buf, &b, DEFAULT_CHANNELS);
+	sp::pop(&buf, &b);
+	sp::print_buffer(&buf, &b);
 };
