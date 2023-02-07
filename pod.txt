@@ -76,7 +76,7 @@ otype  = xxxxxxxx = SPA_TYPE_OBJECT_Format (262147)
 oid    = xxxxxxxx = SPA_PARAM_EnumFormat (3)
 value  =
 	key      = 00010001 = SPA_FORMAT_AUDIO_format (65537)
-	flags    = 00000000 = (none)
+	flags    = 00000000 = none (0)
 	length   = 00000004 = 4
 	type     = 00000003 = SPA_TYPE_Id (3)
 	value    = 00000101 = SPA_AUDIO_FORMAT_S16 (259)

@@ -1,5 +1,7 @@
 use fmt;
 
+def U32_SIZE: u32 = 4;
+
 export type builder_container = struct {
 	type_: spa_type,
 	start_idx: size,
@@ -8,9 +10,10 @@ export type builder_container = struct {
 export type builder = struct {
 	stack: []builder_container,
 	idx: size,
+	added_bytelen: size,
 };
 
-export fn add(
+export fn add_nolen(
 	buffer: *[]u32,
 	builder: *builder,
 	value: u32,
@@ -20,20 +23,33 @@ export fn add(
 	builder.idx += 1;
 };
 
-export fn add_padding(
+export fn add(
+	buffer: *[]u32,
+	builder: *builder,
+	value: u32,
+) void = {
+	add_nolen(buffer, builder, value);
+	builder.added_bytelen += U32_SIZE;
+};
+
+export fn add_padding_if_needed(
 	buffer: *[]u32,
 	builder: *builder,
 ) void = {
-	add(buffer, builder, 0);
+	if (builder.idx % 2 != 0) {
+		add(buffer, builder, 0);
+	};
 };
 
 export fn record_bytelen(
 	buffer: *[]u32,
 	builder: *builder,
-	value: u32,
 ) void = {
+	const value = builder.added_bytelen: u32;
 	const last_container = builder.stack[len(builder.stack) - 1];
 	buffer[last_container.start_idx] += value;
+	fmt::println(builder.added_bytelen)!;
+	builder.added_bytelen = 0;
 };
 
 export fn push_struct(
@@ -48,6 +64,23 @@ export fn push_struct(
 	add(buffer, builder, spa_type::Struct); // type
 };
 
+export fn push_object(
+	buffer: *[]u32,
+	builder: *builder,
+	otype: spa_type,
+	oid: u32,
+) void = {
+	append(builder.stack, builder_container {
+		type_ = spa_type::Object,
+		start_idx = builder.idx,
+	});
+	add_nolen(buffer, builder, 0); // bytelen
+	add_nolen(buffer, builder, spa_type::Object); // type
+	add(buffer, builder, otype: u32); // otype
+	add(buffer, builder, oid); // oid
+	record_bytelen(buffer, builder);
+};
+
 export fn pop(
 	buffer: *[]u32,
 	builder: *builder,
@@ -55,18 +88,27 @@ export fn pop(
 	void;
 };
 
+export fn add_prop(
+	buffer: *[]u32,
+	builder: *builder,
+	value: u32,
+	flags: u32,
+) void = {
+	add(buffer, builder, value); // key
+	add(buffer, builder, flags); // flags
+	record_bytelen(buffer, builder);
+};
+
 export fn add_int(
 	buffer: *[]u32,
 	builder: *builder,
 	value: i32,
 ) void = {
-	const gross_bytelen = (size(u32) * 4): u32;
-	const net_bytelen = (size(u32) * 1): u32;
-	record_bytelen(buffer, builder, gross_bytelen);
-	add(buffer, builder, net_bytelen); // bytelen
+	add(buffer, builder, U32_SIZE); // bytelen
 	add(buffer, builder, spa_type::Int); // type
 	add(buffer, builder, value: u32); // value
-	add_padding(buffer, builder); // padding
+	add_padding_if_needed(buffer, builder);
+	record_bytelen(buffer, builder);
 };
 
 export fn print_buffer(
