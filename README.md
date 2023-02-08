@@ -3,6 +3,7 @@
 Dependencies:
 
 * [hare-spapod](https://git.sr.ht/~vladh/hare-spapod)
+* [hare-wav](https://git.sr.ht/~vladh/hare-wav)
 
 ## Vendoring
 
