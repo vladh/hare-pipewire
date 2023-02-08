@@ -3,6 +3,9 @@
 Dependencies:
 
 * [hare-spapod](https://git.sr.ht/~vladh/hare-spapod)
+
+Dependencies for demo:
+
 * [hare-wav](https://git.sr.ht/~vladh/hare-wav)
 
 ## Vendoring
@@ -13,4 +16,4 @@ git subtree -P vendor/hare-pipewire/ add https://git.sr.ht/~vladh/hare-pipewire 
 
 ## Test
 
-There is a sine wave test you can run with `make run`. Make sure you turn your speakers down a bit beforehand.
+There is a .wav file test you can run with `make run`. Put a `test.wav` file in the root directory to play it.
