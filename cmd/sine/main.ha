@@ -1,4 +1,7 @@
+use audio::wav;
+use endian;
 use fmt;
+use io;
 use math;
 use os;
 use pw = pipewire;
@@ -9,6 +12,8 @@ type state = struct {
 	loop: nullable *pw::pw_main_loop,
 	stream: nullable *pw::pw_stream,
 	accumulator: f64,
+	f: io::file,
+	reader: *audio::wav::reader,
 };
 
 def TWO_PI: f64 = math::PI + math::PI;
@@ -45,10 +50,14 @@ fn process(data: nullable *void) void = {
 			state.accumulator -= TWO_PI;
 		};
 
-		const val = math::sinf64(state.accumulator) * DEFAULT_VOLUME *
-			UNKNOWN_CONSTANT;
+		let samples: [4]u8 = [0...];
+		io::read(state.reader.src, samples)!;
+		// const val = math::sinf64(state.accumulator) *
+		// 	DEFAULT_VOLUME * UNKNOWN_CONSTANT;
 		for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
-			*dst = val: i16;
+			// *dst = val: i16;
+			*dst = endian::legetu16(
+				samples[c * 2..(c + 1) * 2]): i16;
 			dst = (dst: uintptr + size(i16): uintptr): *i16;
 		};
 	};
@@ -70,15 +79,22 @@ export fn main() void = {
 	let state = state { ... };
 	const argc: int = 0;
 	const argv: nullable **char = null;
+	state.f = os::open("test.wav")!;
+	const (header, reader) = wav::newreader(state.f)!;
+	state.reader = &reader;
+
 	pw::pw_init(&argc, &argv);
 	state.loop = pw::pw_main_loop_new(null);
 	state.stream = pw::pw_stream_new_simple(
 		pw::pw_main_loop_get_loop(state.loop),
 		pw::strtoc("audio-src\0"),
 		pw::pw_properties_new(
-			pw::strtoc(pw::PW_KEY_MEDIA_TYPE), pw::strtoc("Audio\0"),
-			pw::strtoc(pw::PW_KEY_MEDIA_CATEGORY), pw::strtoc("Playback\0"),
-			pw::strtoc(pw::PW_KEY_MEDIA_ROLE), pw::strtoc("Music\0"),
+			pw::strtoc(pw::PW_KEY_MEDIA_TYPE),
+			pw::strtoc("Audio\0"),
+			pw::strtoc(pw::PW_KEY_MEDIA_CATEGORY),
+			pw::strtoc("Playback\0"),
+			pw::strtoc(pw::PW_KEY_MEDIA_ROLE),
+			pw::strtoc("Music\0"),
 			null),
 		&STREAM_EVENTS,
 		&state);
