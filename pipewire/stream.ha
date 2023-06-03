@@ -1,4 +1,5 @@
 use spa;
+use types::c;
 
 export type pw_stream = void; // opaque
 export type pw_stream_control = void; // opaque
@@ -40,7 +41,7 @@ export type pw_stream_events = struct {
 	state_changed: *fn(data: nullable *void,
 		old: pw_stream_state,
 		state: pw_stream_state,
-		error: nullable *char) void,
+		error: nullable *c::char) void,
 	control_info: *fn(data: nullable *void,
 		id: u32,
 		control: nullable *pw_stream_control) void,
@@ -64,7 +65,7 @@ export type pw_stream_events = struct {
 
 export @symbol("pw_stream_new_simple") fn pw_stream_new_simple(
 	loop: nullable *pw_loop,
-	name: nullable *char,
+	name: nullable *c::char,
 	props: nullable *pw_properties,
 	events: nullable *pw_stream_events,
 	data: nullable *void,

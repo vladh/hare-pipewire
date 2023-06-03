@@ -7,6 +7,7 @@ use os;
 use pw = pipewire;
 use sp = spapod;
 use spa;
+use types::c;
 
 type state = struct {
 	loop: nullable *pw::pw_main_loop,
@@ -78,7 +79,7 @@ def STREAM_EVENTS: pw::pw_stream_events = pw::pw_stream_events {
 export fn main() void = {
 	let state = state { ... };
 	const argc: int = 0;
-	const argv: nullable **char = null;
+	const argv: nullable **c::char = null;
 	state.f = os::open("test.wav")!;
 	const (header, reader) = wav::newreader(state.f)!;
 	state.reader = &reader;
@@ -87,14 +88,14 @@ export fn main() void = {
 	state.loop = pw::pw_main_loop_new(null);
 	state.stream = pw::pw_stream_new_simple(
 		pw::pw_main_loop_get_loop(state.loop),
-		pw::strtoc("audio-src\0"),
+		c::fromstr("audio-src\0"),
 		pw::pw_properties_new(
-			pw::strtoc(pw::PW_KEY_MEDIA_TYPE),
-			pw::strtoc("Audio\0"),
-			pw::strtoc(pw::PW_KEY_MEDIA_CATEGORY),
-			pw::strtoc("Playback\0"),
-			pw::strtoc(pw::PW_KEY_MEDIA_ROLE),
-			pw::strtoc("Music\0"),
+			c::fromstr(pw::PW_KEY_MEDIA_TYPE),
+			c::fromstr("Audio\0"),
+			c::fromstr(pw::PW_KEY_MEDIA_CATEGORY),
+			c::fromstr("Playback\0"),
+			c::fromstr(pw::PW_KEY_MEDIA_ROLE),
+			c::fromstr("Music\0"),
 			null),
 		&STREAM_EVENTS,
 		&state);

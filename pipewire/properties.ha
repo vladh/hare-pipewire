@@ -1,5 +1,7 @@
+use types::c;
+
 export type pw_properties = void; // opqaue
 
 export @symbol("pw_properties_new") fn pw_properties_new(
-	key: nullable *char, ...
+	key: nullable *c::char, ...
 ) nullable *pw_properties;
