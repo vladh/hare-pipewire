@@ -77,17 +77,23 @@ def STREAM_EVENTS: pw::pw_stream_events = pw::pw_stream_events {
 };
 
 export fn main() void = {
-	let state = state { ... };
 	const argc: int = 0;
 	const argv: nullable **c::char = null;
-	state.f = os::open("test.wav")!;
-	const (header, reader) = wav::newreader(state.f)!;
-	state.reader = &reader;
+	const f = os::open("test.wav")!;
+	const (header, reader) = wav::newreader(f)!;
 
 	pw::pw_init(&argc, &argv);
-	state.loop = pw::pw_main_loop_new(null);
+	const loop = pw::pw_main_loop_new(null);
+
+	let state = state {
+		reader = &reader,
+		f = f,
+		loop = loop,
+		...
+	};
+
 	state.stream = pw::pw_stream_new_simple(
-		pw::pw_main_loop_get_loop(state.loop),
+		pw::pw_main_loop_get_loop(loop),
 		c::fromstr("audio-src\0"),
 		pw::pw_properties_new(
 			c::fromstr(pw::PW_KEY_MEDIA_TYPE),
