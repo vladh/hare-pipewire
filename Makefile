@@ -4,13 +4,9 @@
 LIBS=-lpipewire-0.3
 VARS=LD_LIBRARY_PATH=/usr/lib:${LD_LIBRARY_PATH}
 
-bin/sine:
+bin/sine: cmd/sine/*
 	mkdir -p bin
 	$(VARS) hare build $(LIBS) -o bin/sine cmd/sine
-
-bin/podtest:
-	mkdir -p bin
-	$(VARS) hare build $(LIBS) -o bin/podtest cmd/podtest
 
 bin/podinspect: contrib/podinspect.c
 	mkdir -p bin
