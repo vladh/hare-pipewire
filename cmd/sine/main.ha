@@ -7,6 +7,7 @@ use os;
 use pw = pipewire;
 use sp = spapod;
 use spa;
+use types;
 use types::c;
 
 type state = struct {
@@ -22,8 +23,6 @@ def DEFAULT_RATE: u32 = 44100;
 def DEFAULT_CHANNELS: u32 = 2;
 def DEFAULT_VOLUME: f64 = 0.7;
 def PITCH: f64 = 440.0;
-// TODO: What is this?
-def UNKNOWN_CONSTANT: f64 = 16767.0;
 
 fn process(data: nullable *void) void = {
 	const state = data: *state;
@@ -37,31 +36,30 @@ fn process(data: nullable *void) void = {
 
 	const buf = b.buffer;
 	const data = buf.datas as *spa::spa_data;
-	let dst: *i16 = data.data: *i16;
+	let dst = data.data: *[*]u8;
+	//let dst = data.data: *i16;
 	if (dst == null) {
 		return;
 	};
 
-	const stride: u32 = (size(i16): u32) * DEFAULT_CHANNELS;
+	static const stride: u32 = (size(i16): u32) * DEFAULT_CHANNELS;
 	const n_frames: u32 = data.maxsize / stride;
 
-	for (let i = 0z; i < n_frames; i += 1) {
-		state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f64;
-		if (state.accumulator >= TWO_PI) {
-			state.accumulator -= TWO_PI;
-		};
+	io::read(state.reader.src, dst[..data.maxsize])!;
 
-		let samples: [4]u8 = [0...];
-		io::read(state.reader.src, samples)!;
-		// const val = math::sinf64(state.accumulator) *
-		// 	DEFAULT_VOLUME * UNKNOWN_CONSTANT;
-		for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
-			// *dst = val: i16;
-			*dst = endian::legetu16(
-				samples[c * 2..(c + 1) * 2]): i16;
-			dst = (dst: uintptr + size(i16): uintptr): *i16;
-		};
-	};
+	//for (let i = 0z; i < n_frames; i += 1) {
+	//	state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f64;
+	//	if (state.accumulator >= TWO_PI) {
+	//		state.accumulator -= TWO_PI;
+	//	};
+	//
+	//	const val = math::sinf64(state.accumulator) *
+	//		DEFAULT_VOLUME * types::I16_MAX: f64;
+	//	for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
+	//		*dst = val: i16;
+	//		dst = (dst: uintptr + size(i16): uintptr): *i16;
+	//	};
+	//};
 
 	data.chunk.offset_ = 0;
 	data.chunk.stride = stride: i32;
