@@ -37,7 +37,7 @@ fn process(data: nullable *opaque) void = {
 	const buf = b.buffer;
 	const data = buf.datas as *spa::spa_data;
 	let dst = data.data: *[*]u8;
-	//let dst = data.data: *i16;
+	// let dst = data.data: *i16;
 	if (dst == null) {
 		return;
 	};
@@ -47,19 +47,19 @@ fn process(data: nullable *opaque) void = {
 
 	io::read(state.reader.src, dst[..data.maxsize])!;
 
-	//for (let i = 0z; i < n_frames; i += 1) {
-	//	state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f64;
-	//	if (state.accumulator >= TWO_PI) {
-	//		state.accumulator -= TWO_PI;
-	//	};
-	//
-	//	const val = math::sinf64(state.accumulator) *
-	//		DEFAULT_VOLUME * types::I16_MAX: f64;
-	//	for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
-	//		*dst = val: i16;
-	//		dst = (dst: uintptr + size(i16): uintptr): *i16;
-	//	};
-	//};
+	// for (let i = 0z; i < n_frames; i += 1) {
+	// 	state.accumulator += TWO_PI * PITCH / DEFAULT_RATE: f64;
+	// 	if (state.accumulator >= TWO_PI) {
+	// 		state.accumulator -= TWO_PI;
+	// 	};
+
+	// 	const val = math::sinf64(state.accumulator) *
+	// 		DEFAULT_VOLUME * types::I16_MAX: f64;
+	// 	for (let c = 0z; c < DEFAULT_CHANNELS; c += 1) {
+	// 		*dst = val: i16;
+	// 		dst = (dst: uintptr + size(i16): uintptr): *i16;
+	// 	};
+	// };
 
 	data.chunk.offset_ = 0;
 	data.chunk.stride = stride: i32;
