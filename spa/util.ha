@@ -1,1 +1,1 @@
-export type spa_command = void; // opaque
+export type spa_command = opaque;

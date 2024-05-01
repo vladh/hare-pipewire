@@ -1,15 +1,15 @@
 use spa;
 use types::c;
 
-export type pw_stream = void; // opaque
-export type pw_stream_control = void; // opaque
+export type pw_stream = opaque;
+export type pw_stream_control = opaque;
 export type pw_direction = enum {
 	PW_DIRECTION_INPUT = 0,
 	PW_DIRECTION_OUTPUT = 1,
 };
 export type pw_buffer = struct {
 	buffer: *spa::spa_buffer,
-	user_data: *void,
+	user_data: *opaque,
 	sz: u64,
 	requested: u64,
 };
@@ -37,30 +37,30 @@ export type pw_stream_flags = enum u32 {
 
 export type pw_stream_events = struct {
 	version: u32,
-	destroy: nullable *fn(data: nullable *void) void,
-	state_changed: nullable *fn(data: nullable *void,
+	destroy: nullable *fn(data: nullable *opaque) void,
+	state_changed: nullable *fn(data: nullable *opaque,
 		old: pw_stream_state,
 		state: pw_stream_state,
 		error: nullable *c::char) void,
-	control_info: nullable *fn(data: nullable *void,
+	control_info: nullable *fn(data: nullable *opaque,
 		id: u32,
 		control: nullable *pw_stream_control) void,
-	io_changed: nullable *fn(data: nullable *void,
+	io_changed: nullable *fn(data: nullable *opaque,
 		id: u32,
-		area: nullable *void,
+		area: nullable *opaque,
 		sz: u32) void,
-	param_changed: nullable *fn(data: nullable *void,
+	param_changed: nullable *fn(data: nullable *opaque,
 		id: u32,
 		param: nullable *spa::spa_pod) void,
-	add_buffer: nullable *fn(data: nullable *void,
+	add_buffer: nullable *fn(data: nullable *opaque,
 		buffer: nullable *pw_buffer) void,
-	remove_buffer: nullable *fn(data: nullable *void,
+	remove_buffer: nullable *fn(data: nullable *opaque,
 		buffer: nullable *pw_buffer) void,
-	process: nullable *fn(data: nullable *void) void,
-	drained: nullable *fn(data: nullable *void) void,
-	command: nullable *fn(data: nullable *void,
+	process: nullable *fn(data: nullable *opaque) void,
+	drained: nullable *fn(data: nullable *opaque) void,
+	command: nullable *fn(data: nullable *opaque,
 		command: nullable *spa::spa_command) void,
-	trigger_done: nullable *fn(data: nullable *void) void,
+	trigger_done: nullable *fn(data: nullable *opaque) void,
 };
 
 export @symbol("pw_stream_new_simple") fn pw_stream_new_simple(
@@ -68,7 +68,7 @@ export @symbol("pw_stream_new_simple") fn pw_stream_new_simple(
 	name: nullable *c::char,
 	props: nullable *pw_properties,
 	events: nullable *pw_stream_events,
-	data: nullable *void,
+	data: nullable *opaque,
 ) *pw_stream;
 
 export @symbol("pw_stream_connect") fn pw_stream_connect(

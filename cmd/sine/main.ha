@@ -24,7 +24,7 @@ def DEFAULT_CHANNELS: u32 = 2;
 def DEFAULT_VOLUME: f64 = 0.7;
 def PITCH: f64 = 440.0;
 
-fn process(data: nullable *void) void = {
+fn process(data: nullable *opaque) void = {
 	const state = data: *state;
 
 	const stream = state.stream as *pw::pw_stream;

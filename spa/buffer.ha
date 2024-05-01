@@ -15,7 +15,7 @@ export type spa_data_flag = enum u32 {
 export type spa_meta = struct {
 	type_: u32,
 	sz: u32,
-	data: nullable *void,
+	data: nullable *opaque,
 };
 
 export type spa_chunk = struct {
@@ -31,7 +31,7 @@ export type spa_data = struct {
 	fd: i64,
 	mapoffset: u32,
 	maxsize: u32,
-	data: *void,
+	data: *opaque,
 	chunk: *spa_chunk,
 };
 

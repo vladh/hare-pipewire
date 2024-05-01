@@ -1,6 +1,6 @@
-export type pw_main_loop = void; // opaque
-export type pw_loop = void; // opaque
-export type spa_dict = void; // opaque
+export type pw_main_loop = opaque;
+export type pw_loop = opaque;
+export type spa_dict = opaque;
 
 export @symbol("pw_main_loop_new") fn pw_main_loop_new(
 	props: nullable *spa_dict,
